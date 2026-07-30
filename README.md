@@ -10,7 +10,7 @@ Realistic Telegram client device profiles for [mtgo](https://github.com/mtgo-lab
 
 ## Features
 
-- **10 device types**: Android, Android-X, iOS, macOS, Windows, Linux, Desktop, Web Z, Web K, Webogram
+- **11 device types**: Android, Android-X, Plus Messenger, iOS, macOS, Windows, Linux, Desktop, Web Z, Web K, Webogram
 - **Static presets**: `TelegramDesktop()`, `TelegramAndroid()`, …
 - **Deterministic generation**: same uniqueID always yields the same model/version — stable session identities across restarts
 - **Direct Config injection**: `profile.Apply(&cfg)` sets `cfg.Device` in one call
@@ -44,6 +44,7 @@ client, err := telegram.NewClient(apiID, apiHash, &cfg)
 |------|-------------|
 | `device.Android` | Official Telegram Android |
 | `device.AndroidX` | Telegram-X for Android |
+| `device.Plus` | Plus Messenger for Android |
 | `device.IOS` | Official Telegram iOS |
 | `device.MacOS` | Official Telegram macOS |
 | `device.Windows` | Telegram Desktop (Windows) |

@@ -16,6 +16,9 @@ func TestTelegramDesktop(t *testing.T) {
 	if p.Platform != types.ClientPlatformDesktop {
 		t.Errorf("expected Platform %q, got %q", types.ClientPlatformDesktop, p.Platform)
 	}
+	if p.PackageID != "org.telegram.desktop" {
+		t.Errorf("expected PackageID %q, got %q", "org.telegram.desktop", p.PackageID)
+	}
 }
 
 func TestTelegramAndroid(t *testing.T) {
@@ -26,12 +29,32 @@ func TestTelegramAndroid(t *testing.T) {
 	if p.LangPack != "android" {
 		t.Errorf("expected LangPack 'android', got %q", p.LangPack)
 	}
+	if p.PackageID != "org.telegram.messenger" {
+		t.Errorf("expected PackageID %q, got %q", "org.telegram.messenger", p.PackageID)
+	}
+}
+
+func TestTelegramAndroidX(t *testing.T) {
+	p := TelegramAndroidX()
+	if p.PackageID != "org.thunderdog.challegram" {
+		t.Errorf("expected PackageID %q, got %q", "org.thunderdog.challegram", p.PackageID)
+	}
+}
+
+func TestTelegramPlus(t *testing.T) {
+	p := TelegramPlus()
+	if p.PackageID != "org.telegram.plus" {
+		t.Errorf("expected PackageID %q, got %q", "org.telegram.plus", p.PackageID)
+	}
 }
 
 func TestTelegramIOS(t *testing.T) {
 	p := TelegramIOS()
 	if p.Platform != types.ClientPlatformIOS {
 		t.Errorf("expected Platform %q, got %q", types.ClientPlatformIOS, p.Platform)
+	}
+	if p.PackageID != "ph.telegra.Telegraph" {
+		t.Errorf("expected PackageID %q, got %q", "ph.telegra.Telegraph", p.PackageID)
 	}
 }
 
@@ -40,12 +63,18 @@ func TestTelegramMacOS(t *testing.T) {
 	if p.LangPack != "macos" {
 		t.Errorf("expected LangPack 'macos', got %q", p.LangPack)
 	}
+	if p.PackageID != "ru.keepcoder.Telegram" {
+		t.Errorf("expected PackageID %q, got %q", "ru.keepcoder.Telegram", p.PackageID)
+	}
 }
 
 func TestTelegramWebZ(t *testing.T) {
 	p := TelegramWebZ()
 	if p.Platform != types.ClientPlatformWeb {
 		t.Errorf("expected Platform %q, got %q", types.ClientPlatformWeb, p.Platform)
+	}
+	if p.PackageID != "" {
+		t.Errorf("expected empty PackageID, got %q", p.PackageID)
 	}
 }
 
@@ -63,6 +92,16 @@ func TestDeviceGenerateAndroid(t *testing.T) {
 	}
 	if p.SystemVersion == "" {
 		t.Error("expected non-empty SystemVersion")
+	}
+}
+
+func TestDeviceGeneratePlus(t *testing.T) {
+	p := Plus.Generate("test-session")
+	if p.DeviceModel == "" {
+		t.Error("expected non-empty DeviceModel")
+	}
+	if p.PackageID != "org.telegram.plus" {
+		t.Errorf("expected PackageID %q, got %q", "org.telegram.plus", p.PackageID)
 	}
 }
 
@@ -177,6 +216,9 @@ func TestProfileApply(t *testing.T) {
 	if cfg.Device.ClientPlatform != p.Platform {
 		t.Errorf("expected ClientPlatform %q, got %q", p.Platform, cfg.Device.ClientPlatform)
 	}
+	if cfg.Device.PackageID != p.PackageID {
+		t.Errorf("expected PackageID %q, got %q", p.PackageID, cfg.Device.PackageID)
+	}
 }
 
 func TestProfileApplyPreservesOtherFields(t *testing.T) {
@@ -215,6 +257,9 @@ func TestToDeviceConfig(t *testing.T) {
 	if dc.ClientPlatform != p.Platform {
 		t.Errorf("expected ClientPlatform %q, got %q", p.Platform, dc.ClientPlatform)
 	}
+	if dc.PackageID != p.PackageID {
+		t.Errorf("expected PackageID %q, got %q", p.PackageID, dc.PackageID)
+	}
 }
 
 func TestGenerateAndroidNonEmpty(t *testing.T) {
@@ -225,7 +270,6 @@ func TestGenerateAndroidNonEmpty(t *testing.T) {
 		}
 	}
 }
-
 
 func TestTelegramWebogram(t *testing.T) {
 	p := TelegramWebogram()
@@ -246,7 +290,7 @@ func TestDeviceGenerateWebogram(t *testing.T) {
 
 func TestConcurrentGenerate(t *testing.T) {
 	// All device types — exercises every lazy-init path concurrently.
-	devices := []Device{Android, AndroidX, IOS, MacOS, Windows, Linux, Desktop}
+	devices := []Device{Android, AndroidX, Plus, IOS, MacOS, Windows, Linux, Desktop}
 
 	var wg sync.WaitGroup
 	for range 200 {

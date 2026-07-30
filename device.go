@@ -34,6 +34,8 @@ const (
 	Android Device = "android"
 	// AndroidX is the Telegram-X Android client.
 	AndroidX Device = "android_x"
+	// Plus is the Plus Messenger Android client.
+	Plus Device = "plus"
 	// IOS is the official Telegram iOS client.
 	IOS Device = "ios"
 	// MacOS is the official Telegram macOS client.
@@ -63,6 +65,8 @@ func (d Device) Generate(uniqueID string) Profile {
 		return GenerateAndroid(uniqueID)
 	case AndroidX:
 		return GenerateAndroidX(uniqueID)
+	case Plus:
+		return GeneratePlus(uniqueID)
 	case IOS:
 		return GenerateIOS(uniqueID)
 	case MacOS:
@@ -101,6 +105,8 @@ type Profile struct {
 	LangPack string
 	// Platform identifies the simulated platform for Telegram's feature gating.
 	Platform types.ClientPlatform
+	// PackageID is the native application package or bundle identifier.
+	PackageID string
 }
 
 // String returns a formatted multi-line representation of the Profile.
@@ -113,9 +119,10 @@ func (p Profile) String() string {
 		"    SystemLangCode: %s\n"+
 		"    LangPack:       %s\n"+
 		"    Platform:       %s\n"+
+		"    PackageID:      %s\n"+
 		"}",
 		p.DeviceModel, p.SystemVersion,
-		p.AppVersion, p.LangCode, p.SystemLangCode, p.LangPack, p.Platform)
+		p.AppVersion, p.LangCode, p.SystemLangCode, p.LangPack, p.Platform, p.PackageID)
 }
 
 // Copy returns a shallow copy of the Profile.
@@ -143,6 +150,7 @@ func (p Profile) ToDeviceConfig() telegram.DeviceConfig {
 		SystemLangCode: p.SystemLangCode,
 		LangPack:       p.LangPack,
 		ClientPlatform: p.Platform,
+		PackageID:      p.PackageID,
 	}
 }
 
@@ -170,6 +178,7 @@ func TelegramDesktop() Profile {
 		SystemLangCode: "en-US",
 		LangPack:       "tdesktop",
 		Platform:       types.ClientPlatformDesktop,
+		PackageID:      "org.telegram.desktop",
 	}
 }
 
@@ -183,6 +192,7 @@ func TelegramAndroid() Profile {
 		SystemLangCode: "en-US",
 		LangPack:       "android",
 		Platform:       types.ClientPlatformAndroid,
+		PackageID:      "org.telegram.messenger",
 	}
 }
 
@@ -196,7 +206,15 @@ func TelegramAndroidX() Profile {
 		SystemLangCode: "en-US",
 		LangPack:       "android",
 		Platform:       types.ClientPlatformAndroid,
+		PackageID:      "org.thunderdog.challegram",
 	}
+}
+
+// TelegramPlus returns a static profile mimicking Plus Messenger for Android.
+func TelegramPlus() Profile {
+	p := TelegramAndroid()
+	p.PackageID = "org.telegram.plus"
+	return p
 }
 
 // TelegramIOS returns a static profile mimicking the official Telegram iOS app.
@@ -209,6 +227,7 @@ func TelegramIOS() Profile {
 		SystemLangCode: "en-US",
 		LangPack:       "ios",
 		Platform:       types.ClientPlatformIOS,
+		PackageID:      "ph.telegra.Telegraph",
 	}
 }
 
@@ -222,6 +241,7 @@ func TelegramMacOS() Profile {
 		SystemLangCode: "en-US",
 		LangPack:       "macos",
 		Platform:       types.ClientPlatformDesktop,
+		PackageID:      "ru.keepcoder.Telegram",
 	}
 }
 
@@ -304,6 +324,13 @@ func GenerateAndroid(uniqueID string) Profile {
 // GenerateAndroidX generates a randomized Telegram-X Android profile.
 func GenerateAndroidX(uniqueID string) Profile {
 	base := TelegramAndroidX()
+	info := randomAndroidDevice(uniqueID)
+	return base.WithDevice(info.model, info.version)
+}
+
+// GeneratePlus generates a randomized Plus Messenger Android profile.
+func GeneratePlus(uniqueID string) Profile {
+	base := TelegramPlus()
 	info := randomAndroidDevice(uniqueID)
 	return base.WithDevice(info.model, info.version)
 }
