@@ -91,6 +91,11 @@ func (d Device) Generate(uniqueID string) Profile {
 // Profile represents a Telegram client device identity: the device fields
 // reported to Telegram during initConnection.
 type Profile struct {
+	// APIID identifies the Telegram client application. It is applied together
+	// with APIHash when both values are set.
+	APIID int32
+	// APIHash authenticates the Telegram client application.
+	APIHash string
 	// DeviceModel is the hardware model (e.g. "iPhone 13 Pro Max").
 	DeviceModel string
 	// SystemVersion is the OS version (e.g. "SDK 31", "Windows 10").
@@ -164,13 +169,17 @@ func (p Profile) ToDeviceConfig() telegram.DeviceConfig {
 //	client, err := telegram.NewClient(apiID, apiHash, &cfg)
 func (p Profile) Apply(cfg *telegram.Config) {
 	cfg.Device = p.ToDeviceConfig()
+	if p.APIID != 0 && p.APIHash != "" {
+		cfg.APIID = p.APIID
+		cfg.APIHash = p.APIHash
+	}
 }
 
 // --- Presets ---
 
 // TelegramDesktop returns a static profile mimicking Telegram Desktop on Windows.
 func TelegramDesktop() Profile {
-	return Profile{
+	return withClientCredentials("telegram_desktop_official", Profile{
 		DeviceModel:    "Desktop",
 		SystemVersion:  "Windows 10",
 		AppVersion:     "5.10.0 x64",
@@ -179,12 +188,12 @@ func TelegramDesktop() Profile {
 		LangPack:       "tdesktop",
 		Platform:       types.ClientPlatformDesktop,
 		PackageID:      "org.telegram.desktop",
-	}
+	})
 }
 
 // TelegramAndroid returns a static profile mimicking the official Telegram Android app.
 func TelegramAndroid() Profile {
-	return Profile{
+	return withClientCredentials("telegram_android", Profile{
 		DeviceModel:    "Samsung SM-G998B",
 		SystemVersion:  "SDK 31",
 		AppVersion:     "8.4.1 (2522)",
@@ -193,12 +202,12 @@ func TelegramAndroid() Profile {
 		LangPack:       "android",
 		Platform:       types.ClientPlatformAndroid,
 		PackageID:      "org.telegram.messenger",
-	}
+	})
 }
 
 // TelegramAndroidX returns a static profile mimicking Telegram-X for Android.
 func TelegramAndroidX() Profile {
-	return Profile{
+	return withClientCredentials("telegram_x", Profile{
 		DeviceModel:    "Samsung SM-G998B",
 		SystemVersion:  "SDK 31",
 		AppVersion:     "8.4.1 (2522)",
@@ -207,19 +216,26 @@ func TelegramAndroidX() Profile {
 		LangPack:       "android",
 		Platform:       types.ClientPlatformAndroid,
 		PackageID:      "org.thunderdog.challegram",
-	}
+	})
 }
 
 // TelegramPlus returns a static profile mimicking Plus Messenger for Android.
 func TelegramPlus() Profile {
-	p := TelegramAndroid()
-	p.PackageID = "org.telegram.plus"
-	return p
+	return withClientCredentials("plus_messenger", Profile{
+		DeviceModel:    "Samsung SM-G998B",
+		SystemVersion:  "SDK 31",
+		AppVersion:     "8.4.1 (2522)",
+		LangCode:       "en",
+		SystemLangCode: "en-US",
+		LangPack:       "android",
+		Platform:       types.ClientPlatformAndroid,
+		PackageID:      "org.telegram.plus",
+	})
 }
 
 // TelegramIOS returns a static profile mimicking the official Telegram iOS app.
 func TelegramIOS() Profile {
-	return Profile{
+	return withClientCredentials("telegram_ios", Profile{
 		DeviceModel:    "iPhone 13 Pro Max",
 		SystemVersion:  "14.8.1",
 		AppVersion:     "8.4",
@@ -228,12 +244,12 @@ func TelegramIOS() Profile {
 		LangPack:       "ios",
 		Platform:       types.ClientPlatformIOS,
 		PackageID:      "ph.telegra.Telegraph",
-	}
+	})
 }
 
 // TelegramMacOS returns a static profile mimicking the official Telegram macOS app.
 func TelegramMacOS() Profile {
-	return Profile{
+	return withClientCredentials("telegram_macos", Profile{
 		DeviceModel:    "MacBook Pro",
 		SystemVersion:  "macOS 12.0.1",
 		AppVersion:     "8.4",
@@ -242,7 +258,7 @@ func TelegramMacOS() Profile {
 		LangPack:       "macos",
 		Platform:       types.ClientPlatformDesktop,
 		PackageID:      "ru.keepcoder.Telegram",
-	}
+	})
 }
 
 // TelegramWebZ returns a static profile mimicking Telegram Web Z (React client).
@@ -260,7 +276,7 @@ func TelegramWebZ() Profile {
 
 // TelegramWebK returns a static profile mimicking Telegram Web K client.
 func TelegramWebK() Profile {
-	return Profile{
+	return withClientCredentials("telegram_web_k", Profile{
 		DeviceModel:    "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/96.0.4664.110 Safari/537.36",
 		SystemVersion:  "Win32",
 		AppVersion:     "1.0.1 K",
@@ -268,7 +284,7 @@ func TelegramWebK() Profile {
 		SystemLangCode: "en-US",
 		LangPack:       "macos",
 		Platform:       types.ClientPlatformWeb,
-	}
+	})
 }
 
 // TelegramWebogram returns a static profile mimicking Telegram Webogram client.

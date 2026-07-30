@@ -223,6 +223,8 @@ func TestProfileApply(t *testing.T) {
 
 func TestProfileApplyPreservesOtherFields(t *testing.T) {
 	p := TelegramIOS()
+	p.APIID = 0
+	p.APIHash = ""
 	cfg := telegram.DefaultConfig
 	cfg.APIID = 12345
 	cfg.APIHash = "my-hash"
@@ -241,6 +243,38 @@ func TestProfileApplyPreservesOtherFields(t *testing.T) {
 	}
 	if !cfg.InMemory {
 		t.Error("Apply should not overwrite InMemory")
+	}
+}
+
+func TestProfileApplyCredentials(t *testing.T) {
+	p := Profile{
+		APIID:   12345,
+		APIHash: "api-hash",
+	}
+	cfg := telegram.DefaultConfig
+	p.Apply(&cfg)
+
+	if cfg.APIID != p.APIID {
+		t.Errorf("expected APIID %d, got %d", p.APIID, cfg.APIID)
+	}
+	if cfg.APIHash != p.APIHash {
+		t.Errorf("expected APIHash %q, got %q", p.APIHash, cfg.APIHash)
+	}
+}
+
+func TestWithClientCredentials(t *testing.T) {
+	const name = "test-client"
+	registerClientCredentials(name, 12345, "api-hash", "example.package")
+
+	p := withClientCredentials(name, Profile{})
+	if p.APIID != 12345 {
+		t.Errorf("expected APIID %d, got %d", 12345, p.APIID)
+	}
+	if p.APIHash != "api-hash" {
+		t.Errorf("expected APIHash %q, got %q", "api-hash", p.APIHash)
+	}
+	if p.PackageID != "example.package" {
+		t.Errorf("expected PackageID %q, got %q", "example.package", p.PackageID)
 	}
 }
 
