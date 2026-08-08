@@ -2,7 +2,7 @@ module github.com/mtgo-labs/device-manager
 
 go 1.26.2
 
-require github.com/mtgo-labs/mtgo v0.15.3-0.20260808175135-7c995b2f9fae
+require github.com/mtgo-labs/mtgo v0.19.0
 
 require (
 	github.com/klauspost/compress v1.19.1 // indirect
